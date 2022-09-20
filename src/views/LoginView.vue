@@ -1,43 +1,75 @@
-<script > 
-import { UserOutlined} from '@ant-design/icons-vue';
-  import { defineComponent } from 'vue';
-  export default defineComponent({
-    components: {
-      UserOutlined,
-    },
-  });</script>
+<script setup> 
+import { defineComponent } from 'vue';
+
+import {Form,Field} from 'vee-validate'
+import { storeToRefs } from 'pinia';
+
+import * as Yup from 'yup'
+import { UserOutlined,SmileOutlined} from '@ant-design/icons-vue';
+import {useAuthStore} from '@/stores'
+
+
+const authStore = useAuthStore();
+const { user: authUser } = storeToRefs(authStore);
+const {modal: modal } = storeToRefs(authStore);
+
+
+ const schema = Yup.object().shape({
+  username:Yup.string().required("usuario es requerido."),
+  password: Yup.string().required("La contraseña es requerida")
+ })
+function onSubmit(values,{setErrors}){
+
+  const authStore = useAuthStore();
+  const {username,password} = values;
+
+  return authStore.login(username, password ).catch(errors =>{
+    authStore.modalShow()
+    setInterval(() => {
+      authStore.sideModal()
+    },3000);
+})
+}
+
+  
+  </script>
 
 <template>
 <main class="login-page">
-<!---
-  <img  class="img-bg" src="../assets/img.jpg"  width="auto" srcset="">
--->
 <h1 class="login-title">    Contable MYJALL</h1>
-<form  class="login-form" action="" method="post">
-  <div class="form-group">
-
-    <label for="usuario" class="label-login" >Usuario</label>
-    <a-input v-model:value="value" placeholder="usuario..." />
-  </div>
-  <div class="form-group">
-
-    <label for="password" class="label-login">Contraseña</label>
-    <a-input-password v-model:value="value" placeholder="password..." />
-  </div>
-  <div class="space-login form-group">
-<hr>
-<user-outlined />
-    <hr>
-  </div>
-  <div class="form-group">
-    <a-button type="primary">L o g i n</a-button>
-
-  </div>
-</form>
+<Form @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
+            <div class="form-group">
+                <label class="label-login">Username</label>
+                <Field name="username" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
+                <div class="invalid-feedback">{{errors.username}}</div>
+            </div>            
+            <div class="form-group">
+                <label class="label-login">Contraseña </label>
+                <Field name="password" type="password" class="form-control" :class="{ 'is-invalid': errors.password }" />
+                <div class="invalid-feedback">{{errors.password}}</div>
+            </div>            
+            <div class="form-group">
+                <button class="btn btn-primary" :disabled="isSubmitting">
+                    <span v-show="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
+                    L O G I N
+                </button>
+            </div>
+            <div v-if="errors.apiError" class="alert alert-danger mt-3 mb-0">{{errors.apiError}}</div>
+        </Form>
 </main>
+<a-alert
 
+  v-if="modal"
+    message="Error"
+    description="Las credenciales no son correctos."
+    type="error"
+    show-icon
+  >
+    <template #icon><smile-outlined /></template>
+  </a-alert>
 </template>
 <style >
+  
   *{
     box-sizing: border-box;
     padding: 0;
@@ -70,9 +102,9 @@ background: linear-gradient(35deg, rgb(255, 255, 255) 0%, rgb(243, 233, 95) 54%,
 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-
+ 
 }
-.login-form{
+ Form{
  position: absolute;
 font-family: 'Inter';
 
@@ -93,6 +125,13 @@ padding: 50px 10px ;
   display: flex;
 flex-direction: column;
 justify-content: space-around;
-margin-top:50px;
+margin-top: 40px;
+}
+
+.showModal{
+  position: absolute;
+  width: 500px;
+  right: 20%;
+  z-index: 1010;
 }
 </style>

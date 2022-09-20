@@ -1,39 +1,38 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import LoginView from '../views/LoginView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'login',
-      component: LoginView
-    },
-    {
-      path: '/inicio',
-      name: 'inicio',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/InicioView.vue')
-    },
-    {
-      path: '/usuarios',
-      name: 'usuarios',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/UsuarioView.vue')
-    },
-    {
-      path: '/usuario/:id',
-      name: 'usuario',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/usuarioView.vue')
+import { useAuthStore } from '@/stores';
+import { InicioView, LoginView,UsuariosView,ClientesView } from '@/views';
+
+export const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    linkActiveClass: 'active',
+    routes: [
+        { path: '/', component: LoginView },
+        { path: '/inicio', component: InicioView ,
+        children: [
+            {
+                name: 'clientes',
+                path: '/inicio/clientes',
+                component:ClientesView
+            },
+            {
+                name: 'users',
+                path: '/inicio/usuarios',
+                component:UsuariosView
+            }
+        ]
     }
-  ]
-})
+    ]
+});
 
-export default router
+router.beforeEach(async (to) => {
+    // redirect to login page if not logged in and trying to access a restricted page
+    const publicPages = ['/'];
+    const authRequired = !publicPages.includes(to.path);
+    const auth = useAuthStore();
+
+    if (authRequired && !auth.user) {
+        auth.returnUrl = to.fullPath;
+        return '/';
+    }
+});

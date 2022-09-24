@@ -37,7 +37,7 @@ function onSubmit(values,{setErrors}){
 <template>
 <main class="login-page">
 <h1 class="login-title">    Contable MYJALL</h1>
-<Form @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
+<Form class="Style-Form" @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
             <div class="form-group">
                 <label class="label-login">Username</label>
                 <Field name="username" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
@@ -104,7 +104,7 @@ background: linear-gradient(35deg, rgb(255, 255, 255) 0%, rgb(243, 233, 95) 54%,
   -webkit-text-fill-color: transparent;
  
 }
- Form{
+ .Style-Form{
  position: absolute;
 font-family: 'Inter';
 

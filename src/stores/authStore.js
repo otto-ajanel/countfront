@@ -30,7 +30,7 @@ export const useAuthStore = defineStore({
                 localStorage.setItem('user', JSON.stringify(user));
                 localStorage.setItem('token',user.data.token)
 
-                
+            
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/inicio');
             } else {

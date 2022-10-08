@@ -31,8 +31,8 @@
         </template>
         
         <template v-if="column.dataIndex === 'id'">
-    <a-button  type="primary" ghost @click="showModalEditar(record.id)">Editar</a-button>
-    <a-button danger  @click="eliminarUser(record.id)">Eliminar</a-button>
+    <a-button  type="primary" ghost @click="setUserEdit(record.id)">Editar</a-button>
+    <a-button danger  @click="deleteUser(record.id)">Eliminar</a-button>
           
         </template>
       </template>
@@ -40,14 +40,13 @@
       
     </a-table>
     <div>
-     <input  
-     v-model="userEdit.username"
-     type="text">
+     
+
     
     <a-drawer
-      title="Editar Usuario"
+      title="Modulo de Editar Usuario"
       placement="right"
-      :visible="visible"
+      :visible="formVisible"
       :get-container="false"
       :style="{
         position: 'absolute'
@@ -56,75 +55,144 @@
       @close="onClose"
     >
       <p > Usuario</p>
-      <Form @submit="saveEdit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
-            <div class="form-group">
-                <label class="label-login">Username</label>
-                <Field v-model="userEdit.username" name="username" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
-                <div class="invalid-feedback">{{errors.username}}</div>
-            </div> 
-            <div class="form-group">
-              <Field name="field" as="select">
-                <option>Coffee</option>
-                <option>Tea</option>
-                <option>Coke</option>
-              </Field>      
-            </div>            
-            <div class="form-group">
-                <label class="label-login">Contraseña </label>
-                <Field name="password" type="password" class="form-control" :class="{ 'is-invalid': errors.password }" />
-                <div class="invalid-feedback">{{errors.password}}</div>
-            </div>            
-            <div class="form-group">
-                <button class="btn btn-primary" :disabled="isSubmitting">
-                    <span v-show="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
-                    Guardar Cambios
-                </button>
-            </div>
-            <div v-if="errors.apiError" class="alert alert-danger mt-3 mb-0">{{errors.apiError}}</div>
-        </Form>
-        
+      <a-form
+				id="components-form-demo-normal-login"
+				:form="form"
+				class="login-form"
+				@submit="saveUser"
+        aria-autocomplete="off"
+			>
+				<a-form-item class="mb-10">
+					<a-input
+						v-model:value="userEdit.username"
+						placeholder="userName" />
+					
+				</a-form-item>
+				<a-form-item class="mb-10">
+					<a-input v-model:value="userEdit.email"
+						placeholder="Email"
+					>
+					</a-input>
+				</a-form-item>
+        <a-form-item>
+          <a-select
+            v-model:value="value"
+            show-search
+            placeholder="Seleciona el rol de usuario"
+            style="width: 100%"
+            :options="options"
+            :filter-option="filterOption"
+            @focus="handleFocus"
+            @blur="handleBlur"
+            @change="handleChange"
+  ></a-select>
+        </a-form-item>
+				
+				<a-form-item class="mb-10">
+				
+					
+				</a-form-item>
+				<a-form-item>
+					<a-button type="primary" block html-type="submit" class="login-form-button">
+						Guardar Cambios
+					</a-button>
+				</a-form-item>
+			</a-form>
+    </a-drawer>
+    <a-drawer
+      title="Modulo de Crea Usuario"
+      placement="right"
+      :visible="formVisibleNew"
+      :get-container="false"
+      :style="{
+        position: 'absolute'
+    }"
+      :width="550"
+      @close="onCloseNewF"
+    >
+      <p > Usuario</p>
+      <a-form
+				id="components-form-demo-normal-login"
+				:form="form"
+				class="login-form"
+				@submit="saveUser"
+        aria-autocomplete="off"
+			>
+				<a-form-item class="mb-10">
+					<a-input
+						v-model:value="newUser.username"
+						placeholder="Nombre de Usuario" />
+					
+				</a-form-item>
+				<a-form-item class="mb-10">
+					<a-input v-model:value="newUser.email"
+						placeholder="Email"
+					>
+					</a-input>
+				</a-form-item>
+        <a-form-item>
+          <a-select
+            v-model:value="value"
+            show-search
+            placeholder="Seleciona el rol de usuario"
+            style="width: 100%"
+            :options="options"
+            :filter-option="filterOption"
+            @focus="handleFocus"
+            @blur="handleBlur"
+            @change="handleChange"
+  ></a-select>
+        </a-form-item>
+				
+				<a-form-item class="mb-10">
+				
+          <a-input-password v-model:value="newUser.password" placeholder="Contraseña" />
+
+				</a-form-item>
+				<a-form-item>
+					<a-button type="primary" block html-type="submit" class="login-form-button">
+						Guardar Nuevo Usuario
+					</a-button>
+				</a-form-item>
+			</a-form>
     </a-drawer>
 
-</div>
+
   </div>
-
+  <!--Button for Create New  USer-->
+  <div class="new-user">
+    <a-button type="primary" shape="circle" size="large" @click="setUserNew">
+      <template #icon>
+      <plus-outlined 
+      :style="{  fontSize:'30px',color: '#ffff'}" 
+    />
+      </template>
+    </a-button>
+  </div>
   
+</div>
+</template>
 
-  </template>
-  <script  setup>
-    
-import { defineComponent,reactive } from 'vue';
+<script setup>
+  
+import { storeToRefs } from 'pinia';
+import { ref,computed, onMounted } from 'vue';
 import {Form,Field} from 'vee-validate'
 import * as Yup from 'yup'
-import { SmileOutlined, DownOutlined,UserOutlined, InfoCircleOutlined, CloseSquareFilled } from '@ant-design/icons-vue';
-import { ref } from 'vue';
-import { mapState, storeToRefs } from 'pinia';
-import { useUsersStore } from '../stores';
+import {PlusOutlined, SmileOutlined, DownOutlined,UserOutlined, InfoCircleOutlined, CloseSquareFilled } from '@ant-design/icons-vue';
 import axios from 'axios';
-import {useAuthStore} from '@/stores'
+import {useAuthStore,useUsersStore} from '@/stores'
+const usersStore = useUsersStore()
+const {newUser,users,userEdit,formVisible,onCloseFormE,formVisibleNew}=storeToRefs(useUsersStore())
+const {setUserEdit,deleteUser,saveEdited,setUserNew,saveUser,onCloseNewF}=useUsersStore()
 
 const schema=Yup.object().shape({
   username:Yup.string().required('No puede ir el usuario vacio'),
   rol:Yup.number().required('El rol es requrido '),
   password:Yup.string().required("Asegure con proteccion")
-})
-
-
-const authStore = useAuthStore();
-
- const usersStore=useUsersStore()
-
- usersStore.getAll()
-
-   const userToEdit=ref({
-      idEdit:null,
-      username:"",
-      rol:0,
-      password:""
-   })
- const {users}= storeToRefs(useUsersStore())
- const {userEdit}= storeToRefs(useUsersStore())
-  const columns = [{
+})   
+    
+const columns = [{
     name: 'Name',
     title:'username',
     dataIndex: 'username',
@@ -134,50 +202,79 @@ const authStore = useAuthStore();
     title: 'correo',
     
     dataIndex: 'email',
-  
+    
   }, {
     title: 'Acciòn',
     dataIndex:'id'
   }];
+  const options = ref([{
+      value: 1,
+      label: 'Administrador',
+    }, {
+      value: 2,
+      label: 'Contador',
+    }])
+
+    const handleChange = value => {
+      console.log(`selected ${value}`);
+    };
+
+    const handleBlur = () => {
+      console.log('blur');
+    };
+
+    const handleFocus = () => {
+      console.log('focus');
+    };
 
   const visible = ref(false);
+
   
-    const showModalEditar = (id) => {
-      usersStore.getUserById(id)
-
-      visible.value=true;
-     
-
-
-    };
-
-    const handleOk = () => {
-      console.log("butoton ok ")
-
-      visible.value = false;
-    };
+  const handleOk = () => {
+    console.log("butoton ok ")
     
-    const eliminarUser=(id)=>{
-       console.log(id)
-    }
+    visible.value = false;
+  };
+  
+  const onFinish = values => {
+    console.log('Success:', values);
+  };
+  
+  const onFinishFailed = errorInfo => {
+    console.log('Failed:', errorInfo);
+  };
+  
+  const disabled = computed(() => {
+    return !(formState.username && formState.password);
+  });
+  
+  const onClose = () => {
+    usersStore.onCloseFormE()
+  };
+
+  const saveEdit=(values,{setErrores})=>{
+
+    const authStore = useAuthStore();
+    const {username,password,rol} = values;
     
-   
+    console.log("guardar  cambios ")
+  }
+ 
+  
+ onMounted(()=>{
+  usersStore.getAll()
+ })
+
+
+</script>
+<style>
+  .new-user{
     
-
-const afterVisibleChange = bool => {
-  console.log('visible', bool);
-};
-
-
-
-const onClose = () => {
-  visible.value = false;
-};
- const saveEdit=(values,{setErrores})=>{
-  const authStore = useAuthStore();
-  const {username,password,rol} = values;
-
-  console.log("guardar  cambios ")
- }
-
-  </script>
+    position: absolute;
+    top: 5px;
+    right: 2px;
+    border-radius: 3px;
+    border: none !important;
+  }
+  
+</style>

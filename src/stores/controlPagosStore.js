@@ -5,7 +5,7 @@ import { message } from 'ant-design-vue';
 import { useToast } from 'vue-toastification';
 const toast = useToast();
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/users/all`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/constancia/all`;
 const opciones = {
     method: 'GET',
     headers: {
@@ -14,48 +14,44 @@ const opciones = {
     }
 }
 
-export const useUsersStore = defineStore('users', {
+export const useControlPagosStore = defineStore('controlPagos', {
 
     state: () => ({
-        users: [],
-        userEdit: {
+        controlPagos: [],
+        controlPagoEdit: {
 
         },
         formVisible: false,
         formVisibleNew: false,
-        newUser: {
-            username: null,
-            email: null,
-            rol: null,
-            password: null
+        newControlPago: {
+            nombre: null,
+            clienteId: null,
         }
     }),
     actions: {
         async getAll() {
+            const headers = opciones
+            await axios.get(baseUrl, headers)
+                .then(constancias => {
 
-            await axios.get(baseUrl)
-                .then(users => {
-
-                    this.users = users.data.data
+                    this.constancias = constancias.data.data
                 })
-                .catch(error => this.users = { error })
+                .catch(error => this.constancias = { error })
         },
-        setUserEdit(id) {
+        setConstanciaEdit(id) {
             this.formVisible = true
             this.title = "Modulo de Editar Usuario"
-            let user = this.users.find(user => user.id == id)
-            if (user) {
-                this.userEdit = user
+            let constancia = this.constancias.find(constancia => constancia.id == id)
+            if (constancia) {
+                this.constanciaEdit = constancia
             }
-            else { this.userEdit = [] }
+            else { this.constanciaEdit = [] }
 
         },
-        setUserNew() {
+        setConstanciaNew() {
 
-            this.newUser.username = ''
-            this.newUser.email = ''
-            this.newUser.rol = null
-            this.newUser.password = null
+            this.newConstancia.nombre = ''
+            this.newConstancia.constanciaId = ''
             this.formVisibleNew = true
         },
         onCloseFormE() {
@@ -64,22 +60,22 @@ export const useUsersStore = defineStore('users', {
         onCloseNewF() {
             this.formVisibleNew = false
         },
-        async deleteUser(id) {
-            const baseURL = `${import.meta.env.VITE_API_URL}/user/${id}`
+        async deleteConstancia(id) {
+            const baseURL = `${import.meta.env.VITE_API_URL}/constancia/${id}`
             await axios.delete(baseURL, opciones).then(message => {
                 this.getAll()
             }).catch(err =>
-                console.log("error al Eliminar Usuario")
+                console.log("error al Eliminar constancia")
             )
         },
         async saveEdited() {
             const data = {
-                username: this.userEdit.username,
-                email: this.userEdit.email,
+                nombre: this.constanciaEdit.nombre,
+                clienteId: this.constanciaEdit.clienteId,
 
             }
             const headers = opciones
-            const baseURL = `${import.meta.env.VITE_API_URL}/user/${this.userEdit.id}`
+            const baseURL = `${import.meta.env.VITE_API_URL}/constancia/${this.constanciaEdit.id}`
             await axios.put(baseURL, data,
 
 
@@ -93,21 +89,19 @@ export const useUsersStore = defineStore('users', {
             })
 
         },
-        async saveUser() {
+        async saveConstancia() {
             const data = {
-                username: this.newUser.username,
-                email: this.newUser.email,
-                rol: this.newUser.rol,
-                password: this.newUser.password
+                nombre: this.newConstancia.nombre,
+                clienteId: this.newConstancia.clienteId
             }
             const headers = opciones
-            const baseURL = `${import.meta.env.VITE_API_URL}/auth/signup`
-            await axios.post(baseURL,data).then(mess => {
+            const baseURL = `${import.meta.env.VITE_API_URL}/constancia`
+            await axios.post(baseURL, data, headers).then(mess => {
                 this.getAll()
                 this.formVisibleNew = false
                 toast.success('Registrado con exito!')
             }).catch(erro => {
-                toast.info("Error usuario / email que ya esta registrado")
+                toast.info("Error Verifica los datos de la constancia")
             })
 
         }

@@ -109,7 +109,7 @@
         </a-form>
       </a-drawer>
       <a-drawer
-        title="Modulo de Crea Usuario"
+        title="Modulo de Registrar un nuevo Cliente "
         placement="right"
         :visible="formVisibleNew"
         :get-container="false"
@@ -117,20 +117,20 @@
           position: 'absolute'
       }"
         :width="550"
-        @close="onCloseNew"
+        @close="onClose"
       >
-        <p > Usuario</p>
+        <p > Clientes</p>
         <a-form
           id="components-form-demo-normal-login"
           :form="form"
           class="login-form"
-          @submit="saveEdited"
+          @submit="saveCliente"
           aria-autocomplete="off"
         >
           <a-form-item class="mb-10">
             <a-input
               v-model:value="newCliente.nombre"
-              placeholder="Nombre de Usuario" />
+              placeholder="Nombre " />
             
           </a-form-item>
           <a-form-item class="mb-10">
@@ -139,33 +139,34 @@
             >
             </a-input>
           </a-form-item>
-          <a-form-item>
-            <a-select
-              v-model:value="value"
-              show-search
-              placeholder="Seleciona el rol de usuario"
-              style="width: 100%"
-              :options="options"
-              :filter-option="filterOption"
-              @focus="handleFocus"
-              @blur="handleBlur"
-              @change="handleChange"
-    ></a-select>
+
+          <a-form-item class="mb-10">
+            <a-input v-model:value="newCliente.nit"
+              placeholder="Nit"
+            >
+            </a-input>
           </a-form-item>
           
           <a-form-item class="mb-10">
-          
-            <a-input-password  placeholder="Contraseña" />
-  
+            <a-input v-model:value="newCliente.telefono"
+              placeholder="Telefono"
+            >
+            </a-input>
+          </a-form-item>
+          <a-form-item class="mb-10">
+            <a-input v-model:value="newCliente.dpi"
+              placeholder="dpi"
+            >
+            </a-input>
           </a-form-item>
           <a-form-item>
             <a-button type="primary" block html-type="submit" class="login-form-button">
-              Guardar Nuevo Usuario
+              Guardar Cliente
             </a-button>
           </a-form-item>
         </a-form>
       </a-drawer>
-  
+      
   
     </div>
     <!--Button for Create New  USer-->

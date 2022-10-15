@@ -17,11 +17,11 @@
  <router-link 
  class="navlink"
 
- to="/inicio/usuarios">Control de Pagos</router-link>
+ to="/inicio/controlPago">Control de Pagos</router-link>
   
  <router-link
  class="navlink"
- to="/inicio/clientes">Constancias</router-link>
+ to="/inicio/constancias">Constancias</router-link>
  <router-link 
  class="navlink"
  

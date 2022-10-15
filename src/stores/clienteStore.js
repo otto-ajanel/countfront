@@ -16,6 +16,7 @@ export const useClientesStore = defineStore('clientes', {
 
     state: () => ({
         clientes: [],
+        clientesSelect: [],
         clienteEdit: {
 
         },
@@ -36,10 +37,12 @@ export const useClientesStore = defineStore('clientes', {
             this.formVisibleNew = false
         },
         async getAll() {
+            const headers = opciones
 
-            await axios.get(baseUrl)
+            await axios.get(baseUrl, headers)
                 .then(clientes => {
                     this.clientes = clientes.data.data
+                    this.setClientesSelect()
                 })
                 .catch(error => this.clientes = { error })
         },
@@ -53,6 +56,15 @@ export const useClientesStore = defineStore('clientes', {
             else { this.clienteEdit = [] }
 
         },
+        setClientesSelect() {
+            const data = this.clientes.map(cliente => {
+                return {
+                    value: cliente.id,
+                    label: cliente.dpi
+                }
+            })
+            this.clientesSelect = data
+        },
         setClienteNew() {
 
             this.newCliente.nombre = ''
@@ -65,7 +77,7 @@ export const useClientesStore = defineStore('clientes', {
         onCloseFormE() {
             this.formVisible = false
         },
-        async deleteUser(id) {
+        async deleteCliente(id) {
             const baseURL = `${import.meta.env.VITE_API_URL}/cliente/${id}`
             await axios.delete(baseURL, opciones).then(message => {
                 this.getAll()
@@ -75,7 +87,7 @@ export const useClientesStore = defineStore('clientes', {
         },
         async saveEdited() {
             const data = {
-                nombre: this.clienteEdit.username,
+                nombre: this.clienteEdit.nombre,
                 email: this.clienteEdit.email,
                 nit: this.clienteEdit.nit,
                 dpi: this.clienteEdit.dpi,
@@ -84,6 +96,7 @@ export const useClientesStore = defineStore('clientes', {
             }
             const headers = opciones
             const baseURL = `${import.meta.env.VITE_API_URL}/cliente/${this.clienteEdit.id}`
+            console.log(baseURL)
             await axios.put(baseURL, data,
 
 
@@ -97,25 +110,22 @@ export const useClientesStore = defineStore('clientes', {
             })
 
         },
-        async saveUser() {
+        async saveCliente() {
             const data = {
                 nombre: this.newCliente.nombre,
                 dpi: this.newCliente.dpi,
                 nit: this.newCliente.nit,
-                fechaNacimiento: this.newcliente.fecchaNacimiento,
+                fechaNacimiento: this.newCliente.fechaNacimiento,
                 telefono: this.newCliente.telefono,
                 email: this.newCliente.email
             }
             const headers = opciones
             const baseURL = `${import.meta.env.VITE_API_URL}/cliente`
-            await axios.post(baseURL, data,
+            await axios.post(baseURL, data, headers).then(mess => {
+                this.formVisibleNew = false
+                this.getAll()
+                toast.success('Registrado con exito!')
 
-
-                headers
-
-            ).then(mess => {
-                this.getAll
-                this.formVisible = false
             }).catch(erro => {
                 console.log("error  al Nueo suario" + erro)
             })

@@ -13,7 +13,7 @@
     }"
     >
 
-    <a-table :columns="columns" :data-source="users">
+    <a-table :columns="columns" :data-source="constancias">
       <template #headerCell="{ column }">
         <template v-if="column.key === 'id'">
           <span>
@@ -26,13 +26,13 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'id'">
           <a>
-            {{ record.username }}
+            {{ record.constancia}}
           </a>
         </template>
         
         <template v-if="column.dataIndex === 'id'">
-    <a-button  type="primary" ghost @click="setUserEdit(record.id)">Editar</a-button>
-    <a-button danger  @click="deleteUser(record.id)">Eliminar</a-button>
+    <a-button  type="primary" ghost @click="setConstanciaEdit(record.id)">Editar</a-button>
+    <a-button danger  @click="deleteConstancia(record.id)">Eliminar</a-button>
           
         </template>
       </template>
@@ -44,7 +44,7 @@
 
     
     <a-drawer
-      title="Modulo de Editar Usuario"
+      title="Modulo de Editar Constancia"
       placement="right"
       :visible="formVisible"
       :get-container="false"
@@ -64,23 +64,18 @@
 			>
 				<a-form-item class="mb-10">
 					<a-input
-						v-model:value="userEdit.username"
+						v-model:value="constanciaEdit.constancia"
 						placeholder="userName" />
 					
 				</a-form-item>
-				<a-form-item class="mb-10">
-					<a-input v-model:value="userEdit.email"
-						placeholder="Email"
-					>
-					</a-input>
-				</a-form-item>
+				<p>Selección de cliente</p>
         <a-form-item>
           <a-select
-            v-model:value="value"
+            v-model:value="constanciaEdit.clienteId"
             show-search
-            placeholder="Seleciona el rol de usuario"
+            placeholder="Cliente"
             style="width: 100%"
-            :options="options"
+            :options="clientesSelect"
             :filter-option="filterOption"
             @focus="handleFocus"
             @blur="handleBlur"
@@ -99,8 +94,9 @@
 				</a-form-item>
 			</a-form>
     </a-drawer>
+
     <a-drawer
-      title="Modulo de Crea Usuario"
+      title="Modulo de Crear Constancia"
       placement="right"
       :visible="formVisibleNew"
       :get-container="false"
@@ -110,33 +106,28 @@
       :width="550"
       @close="onCloseNewF"
     >
-      <p > Usuario</p>
+      <p > Constancia</p>
       <a-form
 				id="components-form-demo-normal-login"
 				:form="form"
 				class="login-form"
-				@submit="saveUser"
+				@submit="saveConstancia"
         aria-autocomplete="off"
 			>
 				<a-form-item class="mb-10">
 					<a-input
-						v-model:value="newUser.username"
-						placeholder="Nombre de Usuario" />
+						v-model:value="newConstancia.nombre"
+						placeholder="constancia" />
 					
 				</a-form-item>
-				<a-form-item class="mb-10">
-					<a-input v-model:value="newUser.email"
-						placeholder="Email"
-					>
-					</a-input>
-				</a-form-item>
+        <p>Selección de cliente</p>
         <a-form-item>
           <a-select
-            v-model:value="value"
+            v-model:value="newConstancia.clienteId"
             show-search
-            placeholder="Seleciona el rol de usuario"
+            placeholder="selecciona el cliente"
             style="width: 100%"
-            :options="options"
+            :options="clientesSelect"
             :filter-option="filterOption"
             @focus="handleFocus"
             @blur="handleBlur"
@@ -144,14 +135,10 @@
   ></a-select>
         </a-form-item>
 				
-				<a-form-item class="mb-10">
-				
-          <a-input-password v-model:value="newUser.password" placeholder="Contraseña" />
-
-				</a-form-item>
+	
 				<a-form-item>
 					<a-button type="primary" block html-type="submit" class="login-form-button">
-						Guardar Nuevo Usuario
+						Guardar Nueva Constancia
 					</a-button>
 				</a-form-item>
 			</a-form>
@@ -161,7 +148,7 @@
   </div>
   <!--Button for Create New  USer-->
   <div class="new-user">
-    <a-button type="primary" shape="circle" size="large" @click="setUserNew">
+    <a-button type="primary" shape="circle" size="large" @click="setConstanciaNew">
       <template #icon>
       <plus-outlined 
       :style="{  fontSize:'30px',color: '#ffff'}" 
@@ -181,39 +168,45 @@ import {Form,Field} from 'vee-validate'
 import * as Yup from 'yup'
 import {PlusOutlined, SmileOutlined, DownOutlined,UserOutlined, InfoCircleOutlined, CloseSquareFilled } from '@ant-design/icons-vue';
 import axios from 'axios';
-import {useAuthStore,useUsersStore} from '@/stores'
-const usersStore = useUsersStore()
-const {newUser,users,userEdit,formVisible,onCloseFormE,formVisibleNew}=storeToRefs(useUsersStore())
-const {setUserEdit,deleteUser,saveEdited,setUserNew,saveUser,onCloseNewF}=useUsersStore()
+import {useConstanciasStore,useClientesStore} from '@/stores'
+const constanciasStore = useConstanciasStore()
+const clientesStore=useClientesStore();
+
+const {clientesSelect}=storeToRefs(useClientesStore())
+
+const {newConstancia,constancias,constanciaEdit,formVisible,onCloseFormE,formVisibleNew}=storeToRefs(useConstanciasStore())
+const {setConstanciaEdit,deleteConstancia,saveEdited,setConstanciaNew,saveConstancia,onCloseNewF}=useConstanciasStore()
 
 const schema=Yup.object().shape({
-  username:Yup.string().required('No puede ir el usuario vacio'),
-  rol:Yup.number().required('El rol es requrido '),
-  password:Yup.string().required("Asegure con proteccion")
+  nombre:Yup.string().required('No puede ir el usuario vacio'),
+  clienteId:Yup.number().required('El rol es requrido '),
 })   
     
 const columns = [{
-    name: 'Name',
-    title:'username',
-    dataIndex: 'username',
+    name: 'Cliente',
+    title:'Cliente',
+    dataIndex: 'cliente',
+    
+  },{
+    name: 'dpi',
+    title:'DPI',
+    dataIndex: 'dpi',
     
   }, {
-    name:'email',
-    title: 'correo',
-    
-    dataIndex: 'email',
+    name: 'nit',
+    title:'NIT',
+    dataIndex: 'nit',
     
   }, {
+    name: 'constancia',
+    title:'Nombre del Negocio',
+    dataIndex: 'constancia',
+    
+  },  {
     title: 'Acciòn',
     dataIndex:'id'
   }];
-  const options = ref([{
-      value: 1,
-      label: 'Administrador',
-    }, {
-      value: 2,
-      label: 'Contador',
-    }])
+
 
     const handleChange = value => {
       console.log(`selected ${value}`);
@@ -245,17 +238,18 @@ const columns = [{
   };
   
   const disabled = computed(() => {
-    return !(formState.username && formState.password);
+    return !(formState.nombre&& formState.clienteId);
   });
   
   const onClose = () => {
-    usersStore.onCloseFormE()
+    constanciasStore.onCloseFormE()
   };
 
 
   
  onMounted(()=>{
-  usersStore.getAll()
+  constanciasStore.getAll()
+  clientesStore.getAll()
  })
 
 

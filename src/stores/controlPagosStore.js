@@ -5,7 +5,7 @@ import { message } from 'ant-design-vue';
 import { useToast } from 'vue-toastification';
 const toast = useToast();
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/constancia/all`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/controlpago/all`;
 const opciones = {
     method: 'GET',
     headers: {
@@ -18,40 +18,44 @@ export const useControlPagosStore = defineStore('controlPagos', {
 
     state: () => ({
         controlPagos: [],
+        price: 0,
         controlPagoEdit: {
 
         },
         formVisible: false,
         formVisibleNew: false,
         newControlPago: {
-            nombre: null,
+            servicioId: null,
             clienteId: null,
+            totalPago: null,
+
         }
     }),
     actions: {
         async getAll() {
             const headers = opciones
             await axios.get(baseUrl, headers)
-                .then(constancias => {
+                .then(controlPagos => {
 
-                    this.constancias = constancias.data.data
+                    this.controlPagos = controlPagos.data.data
                 })
-                .catch(error => this.constancias = { error })
+                .catch(error => this.controlPagos = { error })
         },
-        setConstanciaEdit(id) {
+        setControlPagoEdit(id) {
             this.formVisible = true
             this.title = "Modulo de Editar Usuario"
-            let constancia = this.constancias.find(constancia => constancia.id == id)
-            if (constancia) {
-                this.constanciaEdit = constancia
+            let controlPago = this.controlPagos.find(controlPago => controlPago.id == id)
+            if (controlPago) {
+                this.controlPago = controlPago
             }
-            else { this.constanciaEdit = [] }
+            else { this.controlPagoEdit = [] }
 
         },
-        setConstanciaNew() {
+        setControlPagoNew() {
 
-            this.newConstancia.nombre = ''
-            this.newConstancia.constanciaId = ''
+            this.newControlPago.clienteId = null;
+            this.newControlPago.servicioId = null
+            this.newControlPago.totalPago = 0
             this.formVisibleNew = true
         },
         onCloseFormE() {
@@ -60,12 +64,12 @@ export const useControlPagosStore = defineStore('controlPagos', {
         onCloseNewF() {
             this.formVisibleNew = false
         },
-        async deleteConstancia(id) {
-            const baseURL = `${import.meta.env.VITE_API_URL}/constancia/${id}`
+        async deleteControlPago(id) {
+            const baseURL = `${import.meta.env.VITE_API_URL}/controlPago/${id}`
             await axios.delete(baseURL, opciones).then(message => {
                 this.getAll()
             }).catch(err =>
-                console.log("error al Eliminar constancia")
+                console.log("error al Eliminar control de pago")
             )
         },
         async saveEdited() {
@@ -75,7 +79,7 @@ export const useControlPagosStore = defineStore('controlPagos', {
 
             }
             const headers = opciones
-            const baseURL = `${import.meta.env.VITE_API_URL}/constancia/${this.constanciaEdit.id}`
+            const baseURL = `${import.meta.env.VITE_API_URL}/controlPago/${this.controlPagoEdit.id}`
             await axios.put(baseURL, data,
 
 
@@ -89,13 +93,14 @@ export const useControlPagosStore = defineStore('controlPagos', {
             })
 
         },
-        async saveConstancia() {
+        async saveControlPago() {
             const data = {
-                nombre: this.newConstancia.nombre,
-                clienteId: this.newConstancia.clienteId
+                servicioId: this.newControlPago.servicioId,
+                clienteId: this.newControlPago.clienteId,
+                totalPago: this.price
             }
             const headers = opciones
-            const baseURL = `${import.meta.env.VITE_API_URL}/constancia`
+            const baseURL = `${import.meta.env.VITE_API_URL}/controlPago`
             await axios.post(baseURL, data, headers).then(mess => {
                 this.getAll()
                 this.formVisibleNew = false

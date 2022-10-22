@@ -13,7 +13,7 @@
   
  <router-link
  class="navlink"
- to="/inicio/clientes">facturas</router-link>
+ to="/inicio/facturas">Facturas</router-link>
  <router-link 
  class="navlink"
 

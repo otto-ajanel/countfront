@@ -1,5 +1,4 @@
 <template>
-
 <div class="main-content"
     :style="{
       overflow: 'hidden',
@@ -10,10 +9,12 @@
       textAlign: 'center',
       background: '#fafafa',
       width: '100%',
+      minHeight:'550px',
+
     }"
     >
 
-    <a-table :columns="columns" :data-source="constancias">
+    <a-table :columns="columns" :data-source="controlPagos">
       <template #headerCell="{ column }">
         <template v-if="column.key === 'id'">
           <span>
@@ -26,13 +27,12 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'id'">
           <a>
-            {{ record.constancia}}
+            {{ record.totalPago}}
           </a>
         </template>
         
         <template v-if="column.dataIndex === 'id'">
-    <a-button  type="primary" ghost @click="setConstanciaEdit(record.id)">Editar</a-button>
-    <a-button danger  @click="deleteConstancia(record.id)">Eliminar</a-button>
+        <a-button danger  @click="deleteControlPago(record.id)">Eliminar</a-button>
           
         </template>
       </template>
@@ -43,60 +43,10 @@
      
 
     
-    <a-drawer
-      title="Modulo de Editar Constancia"
-      placement="right"
-      :visible="formVisible"
-      :get-container="false"
-      :style="{
-        position: 'absolute'
-    }"
-      :width="550"
-      @close="onClose"
-    >
-      <p > Usuario</p>
-      <a-form
-				id="components-form-demo-normal-login"
-				:form="form"
-				class="login-form"
-				@submit="saveEdited"
-        aria-autocomplete="off"
-			>
-				<a-form-item class="mb-10">
-					<a-input
-						v-model:value="constanciaEdit.constancia"
-						placeholder="userName" />
-					
-				</a-form-item>
-				<p>Selección de cliente</p>
-        <a-form-item>
-          <a-select
-            v-model:value="constanciaEdit.clienteId"
-            show-search
-            placeholder="Cliente"
-            style="width: 100%"
-            :options="clientesSelect"
-            :filter-option="filterOption"
-            @focus="handleFocus"
-            @blur="handleBlur"
-            @change="handleChange"
-  ></a-select>
-        </a-form-item>
-				
-				<a-form-item class="mb-10">
-				
-					
-				</a-form-item>
-				<a-form-item>
-					<a-button type="primary" block html-type="submit" class="login-form-button">
-						Guardar Cambios
-					</a-button>
-				</a-form-item>
-			</a-form>
-    </a-drawer>
+  
 
     <a-drawer
-      title="Modulo de Crear Constancia"
+      title="Realizacion de Pago de servicio"
       placement="right"
       :visible="formVisibleNew"
       :get-container="false"
@@ -106,39 +56,52 @@
       :width="550"
       @close="onCloseNewF"
     >
-      <p > Constancia</p>
+      <p></p>
       <a-form
 				id="components-form-demo-normal-login"
 				:form="form"
 				class="login-form"
-				@submit="saveConstancia"
+				@submit="saveControlPago"
         aria-autocomplete="off"
 			>
-				<a-form-item class="mb-10">
-					<a-input
-						v-model:value="newConstancia.nombre"
-						placeholder="constancia" />
-					
-				</a-form-item>
-        <p>Selección de cliente</p>
+	
+        <p>DPI del Cliente</p>
         <a-form-item>
           <a-select
-            v-model:value="newConstancia.clienteId"
+            v-model:value="newControlPago.clienteId"
             show-search
-            placeholder="selecciona el cliente"
+
+            placeholder="selecciona el cliente por medio DPI"
             style="width: 100%"
             :options="clientesSelect"
             :filter-option="filterOption"
             @focus="handleFocus"
             @blur="handleBlur"
             @change="handleChange"
-  ></a-select>
+            >
+          </a-select>
         </a-form-item>
-				
+        <p>Servicio Prestado</p>
+        <a-form-item>
+          <a-select
+            v-model:value="newControlPago.servicioId"
+            show-search
+            placeholder="seleccione el servicio prestado"
+            style="width: 100%"
+            :options="serviciosSelect"
+            :filter-option="filterOption"
+            @focus="handleFocus"
+            @blur="handleBlur"
+            @change="handleChange"
+            >
+          </a-select>
+        </a-form-item>
+				<p>Total a Pagar:</p>
+        <p v-text="price"></p>
 	
 				<a-form-item>
 					<a-button type="primary" block html-type="submit" class="login-form-button">
-						Guardar Nueva Constancia
+						Realizar Pago
 					</a-button>
 				</a-form-item>
 			</a-form>
@@ -148,7 +111,7 @@
   </div>
   <!--Button for Create New  USer-->
   <div class="new-user">
-    <a-button type="primary" shape="circle" size="large" @click="setConstanciaNew">
+    <a-button type="primary" shape="circle" size="large" @click="setControlPagoNew">
       <template #icon>
       <plus-outlined 
       :style="{  fontSize:'30px',color: '#ffff'}" 
@@ -168,14 +131,14 @@ import {Form,Field} from 'vee-validate'
 import * as Yup from 'yup'
 import {PlusOutlined, SmileOutlined, DownOutlined,UserOutlined, InfoCircleOutlined, CloseSquareFilled } from '@ant-design/icons-vue';
 import axios from 'axios';
-import {useConstanciasStore,useClientesStore} from '@/stores'
-const constanciasStore = useConstanciasStore()
+import {useControlPagosStore,useClientesStore} from '@/stores'
+const controlPagosStore = useControlPagosStore()
 const clientesStore=useClientesStore();
 
 const {clientesSelect}=storeToRefs(useClientesStore())
 
-const {newConstancia,constancias,constanciaEdit,formVisible,onCloseFormE,formVisibleNew}=storeToRefs(useConstanciasStore())
-const {setConstanciaEdit,deleteConstancia,saveEdited,setConstanciaNew,saveConstancia,onCloseNewF}=useConstanciasStore()
+const {newControlPago,price,controlPagos,controlPagoEdit,formVisible,onCloseFormE,formVisibleNew}=storeToRefs(useControlPagosStore())
+const {setControlPagoEdit,deleteControlPago,saveEdited,setControlPagoNew,saveControlPago,onCloseNewF}=useControlPagosStore()
 
 const schema=Yup.object().shape({
   nombre:Yup.string().required('No puede ir el usuario vacio'),
@@ -185,12 +148,7 @@ const schema=Yup.object().shape({
 const columns = [{
     name: 'Cliente',
     title:'Cliente',
-    dataIndex: 'cliente',
-    
-  },{
-    name: 'dpi',
-    title:'DPI',
-    dataIndex: 'dpi',
+    dataIndex: 'nombre',
     
   }, {
     name: 'nit',
@@ -198,18 +156,48 @@ const columns = [{
     dataIndex: 'nit',
     
   }, {
-    name: 'constancia',
-    title:'Nombre del Negocio',
-    dataIndex: 'constancia',
+    name: 'servicio',
+    title:'Servicio',
+    dataIndex: 'servicio',
     
-  },  {
+  },{
+    name:'totalPago',
+    title:'Pago Total',
+    dataIndex:'totalPago'
+  }
+  
+  ,  {
     title: 'Acciòn',
     dataIndex:'id'
   }];
-
-
+const serviciosSelect=[
+  {
+    value: 1,
+    label: 'Atualización',
+    price:50
+  },
+  {
+    value: 2,
+    label: 'Honorarios',
+    price:50
+  },
+  {
+    value: 3,
+    label: 'Contancia',
+    price:50
+  },
+  {
+    value: 4,
+    label: 'Inscripción',
+    price:300
+  }
+]
+ 
     const handleChange = value => {
-      console.log(`selected ${value}`);
+
+       let  selectService= serviciosSelect.find((select)=>select.value==value )
+       price.value= selectService.price
+       console.log(selectService)
     };
 
     const handleBlur = () => {
@@ -248,7 +236,7 @@ const columns = [{
 
   
  onMounted(()=>{
-  constanciasStore.getAll()
+  controlPagosStore.getAll()
   clientesStore.getAll()
  })
 

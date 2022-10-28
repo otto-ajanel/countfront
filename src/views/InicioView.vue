@@ -25,7 +25,7 @@
  <router-link 
  class="navlink"
  
- to="/inicio/usuarios">Reportes</router-link>
+ to="/inicio/reportes">Reportes</router-link>
 
 
     </div>

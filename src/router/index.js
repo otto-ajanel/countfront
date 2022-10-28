@@ -1,43 +1,49 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import { useAuthStore } from '@/stores';
-import { InicioView, LoginView,UsuariosView,ClientesView,ConstanciasView } from '@/views';
-import { ControlPagosView, FacturasView } from '../views';
+import { InicioView, LoginView, UsuariosView, ClientesView, ConstanciasView } from '@/views';
+import { ControlPagosView, FacturasView, ReportesView } from '../views';
 
 export const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     linkActiveClass: 'active',
     routes: [
         { path: '/', component: LoginView },
-        { path: '/inicio', component: InicioView ,
-        children: [
-            {
-                name: 'clientes',
-                path: '/inicio/clientes',
-                component:ClientesView
-            },
-            {
-                name: 'users',
-                path: '/inicio/usuarios',
-                component:UsuariosView
-            },
-            {
-                name: 'constancias',
-                path: '/inicio/constancias',
-                component:ConstanciasView
-            },
-            {
-                name: 'controlPagos',
-                path: '/inicio/controlPago',
-                component:ControlPagosView
-            },
-            {
-                name: 'facturas',
-                path: '/inicio/facturas',
-                component:FacturasView
-            }
-        ]
-    }
+        {
+            path: '/inicio', component: InicioView,
+            children: [
+                {
+                    name: 'clientes',
+                    path: '/inicio/clientes',
+                    component: ClientesView
+                },
+                {
+                    name: 'users',
+                    path: '/inicio/usuarios',
+                    component: UsuariosView
+                },
+                {
+                    name: 'constancias',
+                    path: '/inicio/constancias',
+                    component: ConstanciasView
+                },
+                {
+                    name: 'controlPagos',
+                    path: '/inicio/controlPago',
+                    component: ControlPagosView
+                },
+                {
+                    name: 'facturas',
+                    path: '/inicio/facturas',
+                    component: FacturasView
+                },
+                {
+                    name: 'reportes',
+                    path: '/inicio/reportes',
+                    component: ReportesView
+                }
+            ]
+        }
     ]
 });
 

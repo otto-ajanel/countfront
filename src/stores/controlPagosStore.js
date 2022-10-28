@@ -29,14 +29,35 @@ export const useControlPagosStore = defineStore('controlPagos', {
             clienteId: null,
             totalPago: null,
 
-        }
+        },
+        reportServices: [],
+        reportLabels: [],
+        reportData: []
+
     }),
     actions: {
+        async getReportServices() {
+            const headers = opciones
+            const baseURL = `${import.meta.env.VITE_API_URL}/controlPago/reportServices`
+
+            await axios.get(baseURL, headers).then(repSer => {
+                this.reportServices = []
+                this.reportLabels = []
+                this.reportData = []
+                this.reportServices = repSer.data.data
+                this.reportServices.map((element) => {
+                    this.reportData.push(element.cantidad)
+                    this.reportLabels.push(element.servicio)
+                })
+
+            }).catch(err => {
+                this.reportServices = { err }
+            })
+        },
         async getAll() {
             const headers = opciones
             await axios.get(baseUrl, headers)
                 .then(controlPagos => {
-
                     this.controlPagos = controlPagos.data.data
                 })
                 .catch(error => this.controlPagos = { error })
